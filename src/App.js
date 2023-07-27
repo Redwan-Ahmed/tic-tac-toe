@@ -29,16 +29,6 @@ function calculateWinner(squares) {
 }
 
 function Board({ isNext, squares, onPlay }) {
-  const winner = calculateWinner(squares);
-
-  let status;
-
-  if (winner) {
-    status = `Winner : ${winner}`;
-  } else {
-    status = `Next Player: ` + (isNext ? "X" : "O");
-  }
-
   function handleClick(i) {
     if (squares[i] || calculateWinner(squares)) return;
 
@@ -55,7 +45,6 @@ function Board({ isNext, squares, onPlay }) {
 
   return (
     <>
-      <div className="status">{status}</div>
       <div className="board">
         <div className="board-row">
           <Square value={squares[0]} onSquareClick={() => handleClick(0)} />
@@ -80,40 +69,78 @@ function Board({ isNext, squares, onPlay }) {
 export default function Game() {
   const [history, setHistory] = useState([Array(9).fill(null)]);
   const [currentMove, setCurrentMove] = useState(0);
+  const [hasEntries, setHasEntries] = useState(false);
   const currentSquares = history[currentMove];
   const isNext = currentMove % 2 === 0;
+  const winner = calculateWinner(currentSquares);
+
+  let status;
+
+  if (winner) {
+    status = `Winner : ${winner}`;
+  } else {
+    status = `Next Player: ` + (isNext ? "X" : "O");
+  }
 
   function handlePlay(nextSquares) {
     const nextHistory = [...history.slice(0, currentMove + 1), nextSquares];
+    setHasEntries(true);
     setHistory(nextHistory);
     setCurrentMove(nextHistory.length - 1);
   }
 
   function jumpTo(nextMove) {
+    if (nextMove === 0) {
+      setHistory([Array(9).fill(null)]);
+      setHasEntries(false);
+    }
+
     setCurrentMove(nextMove);
   }
 
   const moves = history.map((squares, move) => {
     let description;
+
     if (move > 0) {
       description = "Go to move #" + move;
     } else {
-      description = "Go to game start";
+      description = "Start Again?";
     }
-    return (
-      <li key={move}>
-        <button onClick={() => jumpTo(move)}>{description}</button>
-      </li>
-    );
+
+    if (hasEntries) {
+      return (
+        <li key={move}>
+          <button
+            className="transition duration-500 ease-in-out bg-blue-500 hover:bg-red-500 transform hover:-translate-y-1 hover:scale-110"
+            onClick={() => jumpTo(move)}
+          >
+            {description}
+          </button>
+        </li>
+      );
+    } else {
+      return (
+        <div className="animate-pulse">
+          <h4>Awaiting Moves</h4>
+        </div>
+      );
+    }
   });
 
   return (
-    <div className="game">
+    <div className="game gap-8 columns-2">
+      <div>
+        <h1 className="text-center">Tic Tac Toe</h1>
+      </div>
+      <div className="status">{status}</div>
       <div className="game-board">
         <Board isNext={isNext} squares={currentSquares} onPlay={handlePlay} />
       </div>
-      <div className="game-history"></div>
-      <ol>{moves}</ol>
+      <div className="game-history">
+        <h2>Game History</h2>
+        <ol>{moves}</ol>
+      </div>
     </div>
   );
 }
+
