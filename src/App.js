@@ -1,4 +1,5 @@
 import { useState } from "react";
+import logo from "./assets/tic.png";
 
 function Square({ value, onSquareClick }) {
   return (
@@ -111,7 +112,8 @@ export default function Game() {
       return (
         <li key={move}>
           <button
-            className="transition duration-500 ease-in-out bg-blue-500 hover:bg-red-500 transform hover:-translate-y-1 hover:scale-110"
+            style={{ margin: "4px", padding: "4px" }}
+            className="btn btn-purple transition duration-500 ease-in-out bg-purple-500 hover:bg-pink-500 transform hover:-translate-y-1 hover:scale-110 text-white rounded"
             onClick={() => jumpTo(move)}
           >
             {description}
@@ -128,19 +130,21 @@ export default function Game() {
   });
 
   return (
-    <div className="game gap-8 columns-2">
-      <div>
-        <h1 className="text-center">Tic Tac Toe</h1>
+    <div className="grid grid-cols-3 gap-8">
+      <div className="col-span-2 sm:col-1">
+        <img src={logo} alt="logo" style={{ width: "10%", float: "left" }} />
+        <h1 style={{ float: "left", marginLeft: "15px" }}>Tic Tac Toe</h1>
       </div>
-      <div className="status">{status}</div>
-      <div className="game-board">
+      <div className="col-3 sm:col-span-1">
+        <h2 style={{float: 'right'}}>{status}</h2>
+      </div>
+      <div className="col-span-3 sm:col-span-2" style={{display: 'flex', justifyContent: 'center'}}>
         <Board isNext={isNext} squares={currentSquares} onPlay={handlePlay} />
       </div>
-      <div className="game-history">
-        <h2>Game History</h2>
+      <div className="col-span-3 sm:col-span-1" style={{textAlign: 'center'}}>
+        <h2 style={{ marginBottom: "5px" }}>Game History</h2>
         <ol>{moves}</ol>
       </div>
     </div>
   );
 }
-
