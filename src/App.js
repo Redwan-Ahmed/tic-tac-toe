@@ -115,7 +115,6 @@ export default function Game() {
   useEffect(() => {
     if (currentMove === 9 && !winner) {
       setDraw(true);
-      console.log("DRAW");
       setModalIsOpen(true);
     }
   }, [currentMove, winner]);
@@ -132,7 +131,7 @@ export default function Game() {
     if (winner) {
       status = `Winner : ${winner.winner}`;
     } else {
-      status = `Next Player: ` + (isNext ? "X" : "O");
+      status = `Current Player: ` + (isNext ? "X" : "O");
     }
     setStatus(status);
   }, [winner, isNext]);
@@ -176,7 +175,7 @@ export default function Game() {
       );
     } else {
       return (
-        <div key='awaiting-moves' className="animate-pulse">
+        <div key="awaiting-moves" className="animate-pulse">
           <h4>Awaiting Moves</h4>
         </div>
       );
