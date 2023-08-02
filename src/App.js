@@ -96,9 +96,7 @@ export default function Game() {
   const [modalIsOpen, setModalIsOpen] = useState(false);
   const [clickClose, setClickClose] = useState(false);
 
-  // const openModal = () => {
-  //   setModalIsOpen(true);
-  // };
+  const [draw, setDraw] = useState(false);
 
   const closeModal = () => {
     setClickClose(true);
@@ -111,11 +109,20 @@ export default function Game() {
     setModalIsOpen(false);
     setCurrentMove(0);
     setClickClose(false);
+    setDraw(false);
   };
 
   useEffect(() => {
-    if(winner && !clickClose) {
-      setModalIsOpen(true)
+    if (currentMove === 9 && !winner) {
+      setDraw(true);
+      console.log("DRAW");
+      setModalIsOpen(true);
+    }
+  }, [currentMove, winner]);
+
+  useEffect(() => {
+    if (winner && !clickClose) {
+      setModalIsOpen(true);
     }
   }, [winner, clickClose]);
 
@@ -127,7 +134,7 @@ export default function Game() {
     } else {
       status = `Next Player: ` + (isNext ? "X" : "O");
     }
-    setStatus(status)
+    setStatus(status);
   }, [winner, isNext]);
 
   function handlePlay(nextSquares) {
@@ -169,7 +176,7 @@ export default function Game() {
       );
     } else {
       return (
-        <div className="animate-pulse">
+        <div key='awaiting-moves' className="animate-pulse">
           <h4>Awaiting Moves</h4>
         </div>
       );
@@ -204,14 +211,55 @@ export default function Game() {
             </div>
           </>
         )}
+        {draw && (
+          <>
+            <div className="flex justify-center items-center">
+              <Modal isOpen={modalIsOpen} onClose={closeModal}>
+                <h2 className="text-lg text-center font-semibold mb-4">
+                  It's a Draw!
+                </h2>
+                <p className="text-center" style={{ fontSize: "40px" }}>
+                  🤝
+                </p>
+                <button
+                  className="mt-4 bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+                  style={{ marginRight: "10px" }}
+                  onClick={closeModal}
+                >
+                  Close
+                </button>
+                <button
+                  className="mt-4 bg-purple-500 hover:bg-purple-600 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+                  onClick={restart}
+                >
+                  Start Again?
+                </button>
+              </Modal>
+            </div>
+          </>
+        )}
       </div>
-      <div className="grid grid-cols-3 gap-8">
-        <div className="col-span-2 sm:col-1">
-          <img src={logo} alt="logo" style={{ width: "10%", float: "left" }} />
-          <h1 style={{ float: "left", marginLeft: "15px" }}>Tic Tac Toe</h1>
+      <div className="grid grid-cols-3 gap-4">
+        <div
+          className="col-span-2 sm:col-1"
+          style={{ display: "flex", alignItems: "center" }}
+        >
+          <img
+            src={logo}
+            alt="logo"
+            style={{ width: "10%", marginRight: "15px" }}
+          />
+          <h1 style={{ margin: 0 }}>Tic Tac Toe</h1>
         </div>
-        <div className="col-3 sm:col-span-1">
-          <h2 style={{ float: "right" }}>{status}</h2>
+        <div
+          className="col-3 sm:col-span-1"
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "flex-end",
+          }}
+        >
+          <h2>{status}</h2>
         </div>
         <div
           className="col-span-3 sm:col-span-2"

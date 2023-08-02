@@ -12,21 +12,6 @@ body {
   padding: 0;
 }
 
-h1 {
-  margin-top: 0;
-  font-size: 4vw;
-}
-
-h2 {
-  margin-top: 0;
-  font-size: 3vw;
-}
-
-h4 {
-  margin-top: 0;
-  font-size: 2vw;
-}
-
 code {
   font-size: 1.2em;
 }
@@ -60,6 +45,23 @@ body {
     text-align: center;
     width: 80px;
   }
+
+  h1 {
+    margin-top: 0;
+    font-size: 22px;
+  }
+  
+  h2 {
+    margin-top: 0;
+    font-size: 16px;
+  }
+  
+  h4 {
+    margin-top: 0;
+    font-size: 15px;
+  }
+
+
 }
 
 @media only screen and (min-width: 768px) {
@@ -76,6 +78,21 @@ body {
     padding: 0;
     text-align: center;
     width: 150px;
+  }
+
+  h1 {
+    margin-top: 0;
+    font-size: 4vw;
+  }
+  
+  h2 {
+    margin-top: 0;
+    font-size: 3vw;
+  }
+  
+  h4 {
+    margin-top: 0;
+    font-size: 2vw;
   }
 }
 
