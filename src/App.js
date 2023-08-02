@@ -1,15 +1,20 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import logo from "./assets/tic.png";
+import Confetti from "react-confetti";
+import Modal from "./Modal";
 
-function Square({ value, onSquareClick }) {
+function Square({ value, onSquareClick, isWinningSq }) {
+  const className = isWinningSq ? "square winning-square" : "square";
+
   return (
-    <button className="square" onClick={onSquareClick}>
+    <button className={className} onClick={onSquareClick}>
       {value}
     </button>
   );
 }
 
 function calculateWinner(squares) {
+  let result;
   const lines = [
     [0, 1, 2],
     [3, 4, 5],
@@ -23,15 +28,21 @@ function calculateWinner(squares) {
   for (let i = 0; i < lines.length; i++) {
     const [a, b, c] = lines[i];
     if (squares[a] && squares[a] === squares[b] && squares[a] === squares[c]) {
-      return squares[a];
+      result = {
+        winner: squares[a],
+        winningSquares: [a, b, c],
+      };
+      return result;
     }
   }
-  return null;
+
+  return result;
 }
 
 function Board({ isNext, squares, onPlay }) {
+  const winner = calculateWinner(squares);
   function handleClick(i) {
-    if (squares[i] || calculateWinner(squares)) return;
+    if (squares[i] || winner) return;
 
     const nextSquares = squares.slice();
 
@@ -47,21 +58,27 @@ function Board({ isNext, squares, onPlay }) {
   return (
     <>
       <div className="board">
-        <div className="board-row">
-          <Square value={squares[0]} onSquareClick={() => handleClick(0)} />
-          <Square value={squares[1]} onSquareClick={() => handleClick(1)} />
-          <Square value={squares[2]} onSquareClick={() => handleClick(2)} />
-        </div>
-        <div className="board-row">
-          <Square value={squares[3]} onSquareClick={() => handleClick(3)} />
-          <Square value={squares[4]} onSquareClick={() => handleClick(4)} />
-          <Square value={squares[5]} onSquareClick={() => handleClick(5)} />
-        </div>
-        <div className="board-row">
-          <Square value={squares[6]} onSquareClick={() => handleClick(6)} />
-          <Square value={squares[7]} onSquareClick={() => handleClick(7)} />
-          <Square value={squares[8]} onSquareClick={() => handleClick(8)} />
-        </div>
+        {Array(3)
+          .fill()
+          .map((_, row) => (
+            <div className="board-row" key={row}>
+              {Array(3)
+                .fill()
+                .map((_, col) => {
+                  const squareIndex = row * 3 + col;
+                  return (
+                    <Square
+                      key={squareIndex}
+                      value={squares[squareIndex]}
+                      onSquareClick={() => handleClick(squareIndex)}
+                      isWinningSq={
+                        winner && winner.winningSquares.includes(squareIndex)
+                      }
+                    />
+                  );
+                })}
+            </div>
+          ))}
       </div>
     </>
   );
@@ -74,14 +91,44 @@ export default function Game() {
   const currentSquares = history[currentMove];
   const isNext = currentMove % 2 === 0;
   const winner = calculateWinner(currentSquares);
+  const [status, setStatus] = useState("");
 
-  let status;
+  const [modalIsOpen, setModalIsOpen] = useState(false);
+  const [clickClose, setClickClose] = useState(false);
 
-  if (winner) {
-    status = `Winner : ${winner}`;
-  } else {
-    status = `Next Player: ` + (isNext ? "X" : "O");
-  }
+  // const openModal = () => {
+  //   setModalIsOpen(true);
+  // };
+
+  const closeModal = () => {
+    setClickClose(true);
+    setModalIsOpen(false);
+  };
+
+  const restart = () => {
+    setHistory([Array(9).fill(null)]);
+    setHasEntries(false);
+    setModalIsOpen(false);
+    setCurrentMove(0);
+    setClickClose(false);
+  };
+
+  useEffect(() => {
+    if(winner && !clickClose) {
+      setModalIsOpen(true)
+    }
+  }, [winner, clickClose]);
+
+  useEffect(() => {
+    let status;
+
+    if (winner) {
+      status = `Winner : ${winner.winner}`;
+    } else {
+      status = `Next Player: ` + (isNext ? "X" : "O");
+    }
+    setStatus(status)
+  }, [winner, isNext]);
 
   function handlePlay(nextSquares) {
     const nextHistory = [...history.slice(0, currentMove + 1), nextSquares];
@@ -92,11 +139,11 @@ export default function Game() {
 
   function jumpTo(nextMove) {
     if (nextMove === 0) {
-      setHistory([Array(9).fill(null)]);
-      setHasEntries(false);
+      restart();
+    } else {
+      setCurrentMove(nextMove);
+      setClickClose(false);
     }
-
-    setCurrentMove(nextMove);
   }
 
   const moves = history.map((squares, move) => {
@@ -130,21 +177,56 @@ export default function Game() {
   });
 
   return (
-    <div className="grid grid-cols-3 gap-8">
-      <div className="col-span-2 sm:col-1">
-        <img src={logo} alt="logo" style={{ width: "10%", float: "left" }} />
-        <h1 style={{ float: "left", marginLeft: "15px" }}>Tic Tac Toe</h1>
+    <>
+      <div>
+        {winner && (
+          <>
+            <Confetti />
+            <div className="flex justify-center items-center">
+              <Modal isOpen={modalIsOpen} onClose={closeModal}>
+                <h2 className="text-lg text-center font-semibold mb-4">
+                  🥇 {status} 🏆
+                </h2>
+                <button
+                  className="mt-4 bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+                  style={{ marginRight: "10px" }}
+                  onClick={closeModal}
+                >
+                  Close
+                </button>
+                <button
+                  className="mt-4 bg-purple-500 hover:bg-purple-600 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+                  onClick={restart}
+                >
+                  Start Again?
+                </button>
+              </Modal>
+            </div>
+          </>
+        )}
       </div>
-      <div className="col-3 sm:col-span-1">
-        <h2 style={{float: 'right'}}>{status}</h2>
+      <div className="grid grid-cols-3 gap-8">
+        <div className="col-span-2 sm:col-1">
+          <img src={logo} alt="logo" style={{ width: "10%", float: "left" }} />
+          <h1 style={{ float: "left", marginLeft: "15px" }}>Tic Tac Toe</h1>
+        </div>
+        <div className="col-3 sm:col-span-1">
+          <h2 style={{ float: "right" }}>{status}</h2>
+        </div>
+        <div
+          className="col-span-3 sm:col-span-2"
+          style={{ display: "flex", justifyContent: "center" }}
+        >
+          <Board isNext={isNext} squares={currentSquares} onPlay={handlePlay} />
+        </div>
+        <div
+          className="col-span-3 sm:col-span-1"
+          style={{ textAlign: "center" }}
+        >
+          <h2 style={{ marginBottom: "5px" }}>Game History</h2>
+          <ol>{moves}</ol>
+        </div>
       </div>
-      <div className="col-span-3 sm:col-span-2" style={{display: 'flex', justifyContent: 'center'}}>
-        <Board isNext={isNext} squares={currentSquares} onPlay={handlePlay} />
-      </div>
-      <div className="col-span-3 sm:col-span-1" style={{textAlign: 'center'}}>
-        <h2 style={{ marginBottom: "5px" }}>Game History</h2>
-        <ol>{moves}</ol>
-      </div>
-    </div>
+    </>
   );
 }

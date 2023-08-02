@@ -79,6 +79,10 @@ body {
   }
 }
 
+.winning-square {
+  background: yellow;
+}
+
 .board-row:after {
   clear: both;
   content: "";
